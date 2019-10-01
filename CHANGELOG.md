@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Emit `_root` property on cleanAny events of Selectors.
 
+### Added
+- Add `_uniqueId` property to origins and selectors, which allows to unequivocally identify different instances based on provided arguments.
+
 ## [1.1.0] - 2019-06-25
 ### Added
 - Expose `_root` property in queried instances to allow identify the root instance.
