@@ -2,6 +2,7 @@ const test = require("mocha-sinon-chai");
 
 const { Origin } = require("../src/Origin");
 const { Selector } = require("../src/Selector");
+const { hash } = require("../src/helpers");
 
 test.describe("Selector id", () => {
   const FOO_ID = "foo-origin-id";
@@ -35,6 +36,15 @@ test.describe("Selector id", () => {
     test.it("private property _id should be equal to sources ids adding 'select:' prefix", () => {
       test.expect(testSelector._id).to.equal(`select:${FOO_ID}`);
     });
+
+    test.it(
+      "private property _uniqueId should be equal to the hash of id, default value and concatenated sources uniqueIds",
+      () => {
+        test
+          .expect(testSelector._uniqueId)
+          .to.equal(hash(`${hash(`select:${FOO_ID}${undefined}`)}${testOrigin._uniqueId}`));
+      }
+    );
   });
 
   test.describe("with query", () => {
@@ -42,6 +52,18 @@ test.describe("Selector id", () => {
       "private property _id should be equal to sources ids adding 'select:' prefix and the query id",
       () => {
         test.expect(testSelector.query("foo")._id).to.equal(`select:${FOO_ID}-"foo"`);
+      }
+    );
+
+    test.it(
+      "private property _id should be equal to sources ids adding 'select:' prefix and the query id",
+      () => {
+        const selectorHash = hash(
+          `${hash(`select:${FOO_ID}${undefined}`)}${testOrigin._uniqueId}`
+        );
+        test
+          .expect(testSelector.query("foo")._uniqueId)
+          .to.equal(hash(`${selectorHash}${JSON.stringify("foo")}`));
       }
     );
   });

@@ -2,7 +2,7 @@ import { once, isFunction, isArray } from "lodash";
 import isPromise from "is-promise";
 
 import { Origin } from "./Origin";
-import { READ_METHOD, CREATE_METHOD, UPDATE_METHOD, DELETE_METHOD } from "./helpers";
+import { READ_METHOD, CREATE_METHOD, UPDATE_METHOD, DELETE_METHOD, hash } from "./helpers";
 
 export class Selector extends Origin {
   constructor() {
@@ -19,6 +19,7 @@ export class Selector extends Origin {
     const sources = args.slice(0, lastIndex);
 
     const sourceIds = [];
+    const sourceUniqueIds = [];
 
     const getTestQueries = sourcesOfLevel => {
       const queries = [];
@@ -28,6 +29,7 @@ export class Selector extends Origin {
         } else {
           const hasQuery = !!source.source;
           sourceIds.push(hasQuery ? source.source._id : source._id);
+          sourceUniqueIds.push(hasQuery ? source.source._uniqueId : source._uniqueId);
           if (hasQuery) {
             queries.push(source.query);
           }
@@ -39,6 +41,8 @@ export class Selector extends Origin {
     const testQueries = getTestQueries(sources);
 
     super(`select:${sourceIds.join(":")}`, defaultValue);
+    // override constructor uniqueId: It is more consistant to generate it based on uniqueIds of all provided sources
+    this._uniqueId = hash(`${this._uniqueId}${sourceUniqueIds.join("")}`);
 
     this._sources = sources;
     this._resultsParser = args[lastIndex];
