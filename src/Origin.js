@@ -3,6 +3,8 @@ import { isEqual, cloneDeep, merge } from "lodash";
 import { Cache } from "./Cache";
 
 import { EventEmitter } from "./EventEmitter";
+import { hash } from "./helpers";
+
 import {
   READ_METHOD,
   VALID_METHODS,
@@ -23,6 +25,7 @@ export class Origin {
     this._defaultValue =
       typeof defaultValue !== "undefined" ? cloneDeep(defaultValue) : defaultValue;
 
+    this._uniqueId = hash(`${this._id}${JSON.stringify(this._defaultValue)}`);
     this._customQueries = {};
     this.customQueries = {};
     this.test = {};
@@ -218,6 +221,7 @@ export class Origin {
     newQuery.removeCleanAnyListener = listener => this._removeCleanAnyListener(listener);
     newQuery._queryId = queryUniqueId;
     newQuery._id = `${this._id}${queryUniqueId ? `-${queryUniqueId}` : ""}`;
+    newQuery._uniqueId = hash(`${this._uniqueId}${queryUniqueId}`);
     newQuery.actions = actions;
     newQuery._isSource = true;
     newQuery._root = this;

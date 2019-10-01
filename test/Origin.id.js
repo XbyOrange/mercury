@@ -1,6 +1,7 @@
 const test = require("mocha-sinon-chai");
 
 const { Origin } = require("../src/Origin");
+const { hash } = require("../src/helpers");
 
 test.describe("Origin id", () => {
   const FOO_ID = "foo-id";
@@ -15,10 +16,26 @@ test.describe("Origin id", () => {
   });
 
   test.describe("Without query", () => {
-    test.it("private property _id should be equal to given id", () => {
-      const TestOrigin = class extends Origin {};
-      const testOrigin = new TestOrigin("foo-id");
-      test.expect(testOrigin._id).to.equal(FOO_ID);
+    test.describe("without default value", () => {
+      test.it("private property _id should be equal to given id", () => {
+        const TestOrigin = class extends Origin {};
+        const testOrigin = new TestOrigin("foo-id");
+        test.expect(testOrigin._id).to.equal(FOO_ID);
+      });
+
+      test.it("private property _id should be the hash of given id and undefined", () => {
+        const TestOrigin = class extends Origin {};
+        const testOrigin = new TestOrigin("foo-id");
+        test.expect(testOrigin._uniqueId).to.equal(hash(`${FOO_ID}${undefined}`));
+      });
+    });
+
+    test.describe("with default value", () => {
+      test.it("private property _id should be the hash of given id and undefined", () => {
+        const TestOrigin = class extends Origin {};
+        const testOrigin = new TestOrigin("foo-id", []);
+        test.expect(testOrigin._uniqueId).to.equal(hash(`${FOO_ID}${JSON.stringify([])}`));
+      });
     });
   });
 
