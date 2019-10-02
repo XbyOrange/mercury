@@ -2,7 +2,13 @@ import { once, isFunction, isArray } from "lodash";
 import isPromise from "is-promise";
 
 import { Origin } from "./Origin";
-import { READ_METHOD, CREATE_METHOD, UPDATE_METHOD, DELETE_METHOD, hash } from "./helpers";
+import {
+  READ_METHOD,
+  CREATE_METHOD,
+  UPDATE_METHOD,
+  DELETE_METHOD,
+  selectorUniqueId
+} from "./helpers";
 
 export class Selector extends Origin {
   constructor() {
@@ -42,7 +48,7 @@ export class Selector extends Origin {
 
     super(`select:${sourceIds.join(":")}`, defaultValue);
     // override constructor uniqueId: It is more consistant to generate it based on uniqueIds of all provided sources
-    this._uniqueId = hash(`${this._uniqueId}${sourceUniqueIds.join("")}`);
+    this._uniqueId = selectorUniqueId(this._uniqueId, sourceUniqueIds);
 
     this._sources = sources;
     this._resultsParser = args[lastIndex];

@@ -56,7 +56,7 @@ test.describe("Selector id", () => {
     );
 
     test.it(
-      "private property _id should be equal to sources ids adding 'select:' prefix and the query id",
+      "private property _uniqueId should be equal to the hash of id, default value and concatenated sources uniqueIds and the query id",
       () => {
         const selectorHash = hash(
           `${hash(`select:${FOO_ID}${undefined}`)}${testOrigin._uniqueId}`

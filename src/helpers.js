@@ -54,3 +54,12 @@ export const hash = str => {
     return a & a;
   }, 0)}`;
 };
+
+export const functionId = func => hash(func.toString().replace(/\S/g, ""));
+
+export const originUniqueId = (id, defaultValue) => hash(`${id}${JSON.stringify(defaultValue)}`);
+
+export const queriedUniqueId = (uniqueId, queryUniqueId) => `${uniqueId}-${queryUniqueId}`;
+
+export const selectorUniqueId = (uniqueId, sourcesUniqueIds) =>
+  `${uniqueId}-${sourcesUniqueIds.join("-")}`;

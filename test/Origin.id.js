@@ -1,7 +1,7 @@
 const test = require("mocha-sinon-chai");
 
 const { Origin } = require("../src/Origin");
-const { hash } = require("../src/helpers");
+const helpers = require("../src/helpers");
 
 test.describe("Origin id", () => {
   const FOO_ID = "foo-id";
@@ -9,6 +9,8 @@ test.describe("Origin id", () => {
 
   test.beforeEach(() => {
     sandbox = test.sinon.createSandbox();
+    sandbox.stub(helpers, "originUniqueId");
+    sandbox.stub(helpers, "queriedUniqueId");
   });
 
   test.afterEach(() => {
@@ -23,20 +25,20 @@ test.describe("Origin id", () => {
         test.expect(testOrigin._id).to.equal(FOO_ID);
       });
 
-      test.it("private property _uniqueId should be the hash of given id and undefined", () => {
+      test.it("private property _uniqueId should be calculated using id and default value", () => {
         const TestOrigin = class extends Origin {};
-        const testOrigin = new TestOrigin(FOO_ID);
-        test.expect(testOrigin._uniqueId).to.equal(hash(`${FOO_ID}${undefined}`));
+        new TestOrigin(FOO_ID);
+        test.expect(helpers.originUniqueId).to.have.been.calledWith(FOO_ID, undefined);
       });
     });
 
     test.describe("with default value", () => {
       test.it(
-        "private property _uniqueId should be the hash of given id and given default value",
+        "private property _uniqueId should be calculated based on given id and given default value",
         () => {
           const TestOrigin = class extends Origin {};
-          const testOrigin = new TestOrigin(FOO_ID, []);
-          test.expect(testOrigin._uniqueId).to.equal(hash(`${FOO_ID}${JSON.stringify([])}`));
+          new TestOrigin(FOO_ID, []);
+          test.expect(helpers.originUniqueId).to.have.been.calledWith(FOO_ID, []);
         }
       );
     });
@@ -55,18 +57,19 @@ test.describe("Origin id", () => {
     );
 
     test.it(
-      "private property _uniqueId should be the hash of root _uniqueId and given query",
+      "private property _uniqueId should be the calculated based on root _uniqueId and given query id",
       () => {
+        const FOO_UNIQUE_ID = "foo-unique-id";
+        helpers.originUniqueId.returns(FOO_UNIQUE_ID);
         const TestOrigin = class extends Origin {};
-        const testOrigin = new TestOrigin(FOO_ID, []).query({
+        new TestOrigin(FOO_ID, []).query({
           foo: "foo-query"
         });
-        test.expect(testOrigin._uniqueId).to.equal(
-          hash(
-            `${hash(`${FOO_ID}${JSON.stringify([])}`)}${JSON.stringify({
-              foo: "foo-query"
-            })}`
-          )
+        test.expect(helpers.queriedUniqueId).to.have.been.calledWith(
+          FOO_UNIQUE_ID,
+          JSON.stringify({
+            foo: "foo-query"
+          })
         );
       }
     );
@@ -89,23 +92,24 @@ test.describe("Origin id", () => {
     );
 
     test.it(
-      "private property _uniqueId should be equal to the combination of root _uniqueId and the extension of the queries ids",
+      "private property _uniqueId should be calculated based on the combination of root _uniqueId and the extension of the queries ids",
       () => {
+        const FOO_UNIQUE_ID = "foo-unique-id";
+        helpers.originUniqueId.returns(FOO_UNIQUE_ID);
         const TestOrigin = class extends Origin {};
-        const testOrigin = new TestOrigin(FOO_ID, [])
+        new TestOrigin(FOO_ID, [])
           .query({
             foo: "foo-query"
           })
           .query({
             foo2: "foo-query-2"
           });
-        test.expect(testOrigin._uniqueId).to.equal(
-          hash(
-            `${hash(`${FOO_ID}${JSON.stringify([])}`)}${JSON.stringify({
-              foo: "foo-query",
-              foo2: "foo-query-2"
-            })}`
-          )
+        test.expect(helpers.queriedUniqueId).to.have.been.calledWith(
+          FOO_UNIQUE_ID,
+          JSON.stringify({
+            foo: "foo-query",
+            foo2: "foo-query-2"
+          })
         );
       }
     );
