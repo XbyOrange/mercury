@@ -66,12 +66,19 @@ export const uniqueId = (id, defaultValue) => hash(`${id}${JSON.stringify(defaul
 
 export const queriedUniqueId = (uniqueId, queryUniqueId) => `${uniqueId}-${queryUniqueId}`;
 
-export const selectorUniqueId = (uniqueId, sourcesUniqueIds, selectorMethod, sourcesQueries) =>
+export const selectorUniqueId = (
+  uniqueId,
+  sourcesUniqueIds,
+  selectorMethod,
+  sourcesQueries,
+  sourcesCatches
+) =>
   dashJoin(
     omitEmpty([
       uniqueId,
       dashJoin(sourcesUniqueIds),
       functionId(selectorMethod),
-      functionsId(sourcesQueries)
+      functionsId(sourcesQueries),
+      functionsId(sourcesCatches)
     ])
   );

@@ -35,7 +35,7 @@ test.describe("helpers", () => {
     test.it("should return concated provided id, selectors ids and selector method hash", () => {
       const fooSelectorMethod = () => "foo";
       test
-        .expect(helpers.selectorUniqueId("foo", ["foo2", "foo3"], fooSelectorMethod, []))
+        .expect(helpers.selectorUniqueId("foo", ["foo2", "foo3"], fooSelectorMethod, [], []))
         .to.equal(`foo-foo2-foo3-${helpers.functionId(fooSelectorMethod)}`);
     });
 
@@ -45,15 +45,40 @@ test.describe("helpers", () => {
       const fooQuery2 = () => "foo-2";
       test
         .expect(
-          helpers.selectorUniqueId("foo", ["foo2", "foo3"], fooSelectorMethod, [
-            fooQuery1,
-            fooQuery2
-          ])
+          helpers.selectorUniqueId(
+            "foo",
+            ["foo2", "foo3"],
+            fooSelectorMethod,
+            [fooQuery1, fooQuery2],
+            []
+          )
         )
         .to.equal(
           `foo-foo2-foo3-${helpers.functionId(fooSelectorMethod)}-${helpers.functionId(
             fooQuery1
           )}-${helpers.functionId(fooQuery2)}`
+        );
+    });
+
+    test.it("should add hashes of all provided source catches", () => {
+      const fooSelectorMethod = () => "foo";
+      const fooQuery1 = () => "foo-query-1";
+      const fooCatch1 = () => "foo-catch-2";
+      const fooCatch2 = () => "foo-catch-3";
+      test
+        .expect(
+          helpers.selectorUniqueId(
+            "foo",
+            ["foo2", "foo3"],
+            fooSelectorMethod,
+            [fooQuery1],
+            [fooCatch1, fooCatch2]
+          )
+        )
+        .to.equal(
+          `foo-foo2-foo3-${helpers.functionId(fooSelectorMethod)}-${helpers.functionId(
+            fooQuery1
+          )}-${helpers.functionId(fooCatch1)}-${helpers.functionId(fooCatch2)}`
         );
     });
   });

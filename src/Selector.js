@@ -27,6 +27,7 @@ export class Selector extends Origin {
     const sourceIds = [];
     const sourceUniqueIds = [];
     const allQueries = [];
+    const allCatches = [];
 
     const getTestQueries = sourcesOfLevel => {
       const queries = [];
@@ -40,6 +41,10 @@ export class Selector extends Origin {
           if (hasQueryOrCatch && source.query) {
             queries.push(source.query);
             allQueries.push(source.query);
+          }
+          if (hasQueryOrCatch && source.catch) {
+            // TODO, get catches to expose them for testing purposes. Issue #14
+            allCatches.push(source.catch);
           }
         }
       });
@@ -55,7 +60,8 @@ export class Selector extends Origin {
       this._uniqueId,
       sourceUniqueIds,
       this._resultsParser,
-      allQueries
+      allQueries,
+      allCatches
     );
 
     this._sources = sources;
