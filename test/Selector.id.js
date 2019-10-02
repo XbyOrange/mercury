@@ -148,7 +148,7 @@ test.describe("Selector id", () => {
               "foo-unique-id",
               ["foo-unique-id", "foo-unique-id", "foo-unique-id"],
               selectorMethod,
-              [[]]
+              []
             )
         ]);
       }
@@ -209,7 +209,7 @@ test.describe("Selector id", () => {
               "foo-unique-id",
               ["foo-unique-id", "foo-unique-id", "foo-unique-id"],
               selectorMethod,
-              [[queryMethod1, queryMethod2]]
+              [queryMethod1, queryMethod2]
             )
         ]);
       }

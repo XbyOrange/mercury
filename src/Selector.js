@@ -26,6 +26,7 @@ export class Selector extends Origin {
 
     const sourceIds = [];
     const sourceUniqueIds = [];
+    const allQueries = [];
 
     const getTestQueries = sourcesOfLevel => {
       const queries = [];
@@ -38,6 +39,7 @@ export class Selector extends Origin {
           sourceUniqueIds.push(hasQuery ? source.source._uniqueId : source._uniqueId);
           if (hasQuery) {
             queries.push(source.query);
+            allQueries.push(source.query);
           }
         }
       });
@@ -53,7 +55,7 @@ export class Selector extends Origin {
       this._uniqueId,
       sourceUniqueIds,
       this._resultsParser,
-      testQueries
+      allQueries
     );
 
     this._sources = sources;
