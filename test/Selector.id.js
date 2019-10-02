@@ -14,12 +14,14 @@ test.describe("Selector id", () => {
   let testOrigin2;
   let testOrigin3;
   let testSelector;
+  let selectorMethod;
 
   test.beforeEach(() => {
     sandbox = test.sinon.createSandbox();
     sandbox.stub(helpers, "uniqueId").returns("foo-unique-id");
-    sandbox.stub(helpers, "selectorUniqueId");
+    sandbox.stub(helpers, "selectorUniqueId").returns("foo-selector-unique-id");
     sandbox.stub(helpers, "queriedUniqueId");
+    selectorMethod = originResult => originResult;
     TestOrigin = class extends Origin {
       _read() {
         return Promise.resolve();
@@ -28,7 +30,7 @@ test.describe("Selector id", () => {
     testOrigin = new TestOrigin(FOO_ID);
     testOrigin2 = new TestOrigin(FOO_ID_2);
     testOrigin3 = new TestOrigin(FOO_ID_3);
-    testSelector = new Selector(testOrigin, originResult => originResult);
+    testSelector = new Selector(testOrigin, selectorMethod);
   });
 
   test.afterEach(() => {
@@ -41,13 +43,13 @@ test.describe("Selector id", () => {
     });
 
     test.it(
-      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
+      "private property _uniqueId should be calculated based on selector id, default value, sources uniqueIds, sources queries and selector function",
       () => {
         return Promise.all([
           test.expect(helpers.uniqueId).to.have.been.calledWith(`select:${FOO_ID}`, undefined),
           test
             .expect(helpers.selectorUniqueId)
-            .to.have.been.calledWith("foo-unique-id", ["foo-unique-id"])
+            .to.have.been.calledWith("foo-unique-id", ["foo-unique-id"], selectorMethod, [])
         ]);
       }
     );
@@ -91,23 +93,26 @@ test.describe("Selector id", () => {
     );
 
     test.it(
-      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
+      "private property _uniqueId should be calculated based on selector id, default value, sources uniqueIds, selector method and sources queries",
       () => {
         helpers.uniqueId.reset();
         helpers.uniqueId.returns("foo-unique-id");
         helpers.selectorUniqueId.reset();
+        const queryMethod = query => query;
         testSelector = new Selector(
           {
             source: testOrigin,
-            query: query => query
+            query: queryMethod
           },
-          originResult => originResult
+          selectorMethod
         );
         return Promise.all([
           test.expect(helpers.uniqueId).to.have.been.calledWith(`select:${FOO_ID}`, undefined),
           test
             .expect(helpers.selectorUniqueId)
-            .to.have.been.calledWith("foo-unique-id", ["foo-unique-id"])
+            .to.have.been.calledWith("foo-unique-id", ["foo-unique-id"], selectorMethod, [
+              queryMethod
+            ])
         ]);
       }
     );
@@ -127,27 +132,24 @@ test.describe("Selector id", () => {
     );
 
     test.it(
-      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
+      "private property _uniqueId should be calculated based on selector id, default value, sources uniqueIds, selector method and sources queries",
       () => {
         helpers.uniqueId.reset();
         helpers.uniqueId.returns("foo-unique-id");
         helpers.selectorUniqueId.reset();
-        testSelector = new Selector(
-          [testOrigin3, testOrigin2],
-          testOrigin,
-          originResult => originResult
-        );
+        testSelector = new Selector([testOrigin3, testOrigin2], testOrigin, selectorMethod);
         return Promise.all([
           test
             .expect(helpers.uniqueId)
             .to.have.been.calledWith(`select:${FOO_ID_3}:${FOO_ID_2}:${FOO_ID}`, undefined),
           test
             .expect(helpers.selectorUniqueId)
-            .to.have.been.calledWith("foo-unique-id", [
+            .to.have.been.calledWith(
               "foo-unique-id",
-              "foo-unique-id",
-              "foo-unique-id"
-            ])
+              ["foo-unique-id", "foo-unique-id", "foo-unique-id"],
+              selectorMethod,
+              [[]]
+            )
         ]);
       }
     );
@@ -176,24 +178,26 @@ test.describe("Selector id", () => {
     );
 
     test.it(
-      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
+      "private property _uniqueId should be calculated based on selector id, default value, sources uniqueIds, selector method and sources queries",
       () => {
         helpers.uniqueId.reset();
         helpers.uniqueId.returns("foo-unique-id");
         helpers.selectorUniqueId.reset();
+        const queryMethod1 = query => query;
+        const queryMethod2 = query => query;
         testSelector = new Selector(
           testOrigin3,
           [
             {
               source: testOrigin,
-              query: query => query
+              query: queryMethod1
             },
             {
               source: testOrigin2,
-              query: query => query
+              query: queryMethod2
             }
           ],
-          originResult => originResult
+          selectorMethod
         );
         return Promise.all([
           test
@@ -201,11 +205,12 @@ test.describe("Selector id", () => {
             .to.have.been.calledWith(`select:${FOO_ID_3}:${FOO_ID}:${FOO_ID_2}`, undefined),
           test
             .expect(helpers.selectorUniqueId)
-            .to.have.been.calledWith("foo-unique-id", [
+            .to.have.been.calledWith(
               "foo-unique-id",
-              "foo-unique-id",
-              "foo-unique-id"
-            ])
+              ["foo-unique-id", "foo-unique-id", "foo-unique-id"],
+              selectorMethod,
+              [[queryMethod1, queryMethod2]]
+            )
         ]);
       }
     );
@@ -239,11 +244,13 @@ test.describe("Selector id", () => {
     );
 
     test.it(
-      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
+      "private property _uniqueId should be calculated based on selector id, default value, sources uniqueIds, selector method and query methods",
       () => {
         helpers.uniqueId.reset();
         helpers.uniqueId.returns("foo-unique-id");
         helpers.selectorUniqueId.reset();
+        helpers.selectorUniqueId.returns("foo-selector-unique-id");
+        const queryMethod = result => result;
         testOriginSelector = new Selector(
           {
             source: testOrigin,
@@ -254,9 +261,9 @@ test.describe("Selector id", () => {
         testSelector = new Selector(
           {
             source: testOriginSelector,
-            query: query => query
+            query: queryMethod
           },
-          originResult => originResult
+          selectorMethod
         );
         return Promise.all([
           test
@@ -264,7 +271,9 @@ test.describe("Selector id", () => {
             .to.have.been.calledWith(`select:select:foo-origin-id`, undefined),
           test
             .expect(helpers.selectorUniqueId)
-            .to.have.been.calledWith("foo-unique-id", ["foo-unique-id"])
+            .to.have.been.calledWith("foo-unique-id", ["foo-selector-unique-id"], selectorMethod, [
+              queryMethod
+            ])
         ]);
       }
     );
