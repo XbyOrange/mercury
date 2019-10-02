@@ -2,7 +2,7 @@ const test = require("mocha-sinon-chai");
 
 const { Origin } = require("../src/Origin");
 const { Selector } = require("../src/Selector");
-const { hash } = require("../src/helpers");
+const helpers = require("../src/helpers");
 
 test.describe("Selector id", () => {
   const FOO_ID = "foo-origin-id";
@@ -17,6 +17,9 @@ test.describe("Selector id", () => {
 
   test.beforeEach(() => {
     sandbox = test.sinon.createSandbox();
+    sandbox.stub(helpers, "uniqueId").returns("foo-unique-id");
+    sandbox.stub(helpers, "selectorUniqueId");
+    sandbox.stub(helpers, "queriedUniqueId");
     TestOrigin = class extends Origin {
       _read() {
         return Promise.resolve();
@@ -38,11 +41,14 @@ test.describe("Selector id", () => {
     });
 
     test.it(
-      "private property _uniqueId should be equal to the hash of id, default value and concatenated sources uniqueIds",
+      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
       () => {
-        test
-          .expect(testSelector._uniqueId)
-          .to.equal(hash(`${hash(`select:${FOO_ID}${undefined}`)}${testOrigin._uniqueId}`));
+        return Promise.all([
+          test.expect(helpers.uniqueId).to.have.been.calledWith(`select:${FOO_ID}`, undefined),
+          test
+            .expect(helpers.selectorUniqueId)
+            .to.have.been.calledWith("foo-unique-id", ["foo-unique-id"])
+        ]);
       }
     );
   });
@@ -56,14 +62,15 @@ test.describe("Selector id", () => {
     );
 
     test.it(
-      "private property _uniqueId should be equal to the hash of id, default value and concatenated sources uniqueIds and the query id",
+      "private property _uniqueId should be calculated based on selector unique id and query id",
       () => {
-        const selectorHash = hash(
-          `${hash(`select:${FOO_ID}${undefined}`)}${testOrigin._uniqueId}`
-        );
-        test
-          .expect(testSelector.query("foo")._uniqueId)
-          .to.equal(hash(`${selectorHash}${JSON.stringify("foo")}`));
+        const FOO_SELECTOR_UNIQUE_ID = "foo-selector-unique-id";
+        helpers.selectorUniqueId.returns(FOO_SELECTOR_UNIQUE_ID);
+        testSelector = new Selector(testOrigin, originResult => originResult);
+        testSelector.query("foo");
+        return test
+          .expect(helpers.queriedUniqueId)
+          .to.have.been.calledWith(FOO_SELECTOR_UNIQUE_ID, '"foo"');
       }
     );
   });
@@ -82,6 +89,28 @@ test.describe("Selector id", () => {
         test.expect(testSelector._id).to.equal(`select:${FOO_ID}`);
       }
     );
+
+    test.it(
+      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
+      () => {
+        helpers.uniqueId.reset();
+        helpers.uniqueId.returns("foo-unique-id");
+        helpers.selectorUniqueId.reset();
+        testSelector = new Selector(
+          {
+            source: testOrigin,
+            query: query => query
+          },
+          originResult => originResult
+        );
+        return Promise.all([
+          test.expect(helpers.uniqueId).to.have.been.calledWith(`select:${FOO_ID}`, undefined),
+          test
+            .expect(helpers.selectorUniqueId)
+            .to.have.been.calledWith("foo-unique-id", ["foo-unique-id"])
+        ]);
+      }
+    );
   });
 
   test.describe("when sources are concurrent", () => {
@@ -94,6 +123,32 @@ test.describe("Selector id", () => {
           originResult => originResult
         );
         test.expect(testSelector._id).to.equal(`select:${FOO_ID_3}:${FOO_ID_2}:${FOO_ID}`);
+      }
+    );
+
+    test.it(
+      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
+      () => {
+        helpers.uniqueId.reset();
+        helpers.uniqueId.returns("foo-unique-id");
+        helpers.selectorUniqueId.reset();
+        testSelector = new Selector(
+          [testOrigin3, testOrigin2],
+          testOrigin,
+          originResult => originResult
+        );
+        return Promise.all([
+          test
+            .expect(helpers.uniqueId)
+            .to.have.been.calledWith(`select:${FOO_ID_3}:${FOO_ID_2}:${FOO_ID}`, undefined),
+          test
+            .expect(helpers.selectorUniqueId)
+            .to.have.been.calledWith("foo-unique-id", [
+              "foo-unique-id",
+              "foo-unique-id",
+              "foo-unique-id"
+            ])
+        ]);
       }
     );
   });

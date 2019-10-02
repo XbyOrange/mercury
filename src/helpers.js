@@ -57,7 +57,7 @@ export const hash = str => {
 
 export const functionId = func => hash(func.toString().replace(/\S/g, ""));
 
-export const originUniqueId = (id, defaultValue) => hash(`${id}${JSON.stringify(defaultValue)}`);
+export const uniqueId = (id, defaultValue) => hash(`${id}${JSON.stringify(defaultValue)}`);
 
 export const queriedUniqueId = (uniqueId, queryUniqueId) => `${uniqueId}-${queryUniqueId}`;
 

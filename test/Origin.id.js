@@ -9,7 +9,7 @@ test.describe("Origin id", () => {
 
   test.beforeEach(() => {
     sandbox = test.sinon.createSandbox();
-    sandbox.stub(helpers, "originUniqueId");
+    sandbox.stub(helpers, "uniqueId");
     sandbox.stub(helpers, "queriedUniqueId");
   });
 
@@ -28,7 +28,7 @@ test.describe("Origin id", () => {
       test.it("private property _uniqueId should be calculated using id and default value", () => {
         const TestOrigin = class extends Origin {};
         new TestOrigin(FOO_ID);
-        test.expect(helpers.originUniqueId).to.have.been.calledWith(FOO_ID, undefined);
+        test.expect(helpers.uniqueId).to.have.been.calledWith(FOO_ID, undefined);
       });
     });
 
@@ -38,7 +38,7 @@ test.describe("Origin id", () => {
         () => {
           const TestOrigin = class extends Origin {};
           new TestOrigin(FOO_ID, []);
-          test.expect(helpers.originUniqueId).to.have.been.calledWith(FOO_ID, []);
+          test.expect(helpers.uniqueId).to.have.been.calledWith(FOO_ID, []);
         }
       );
     });
@@ -60,7 +60,7 @@ test.describe("Origin id", () => {
       "private property _uniqueId should be the calculated based on root _uniqueId and given query id",
       () => {
         const FOO_UNIQUE_ID = "foo-unique-id";
-        helpers.originUniqueId.returns(FOO_UNIQUE_ID);
+        helpers.uniqueId.returns(FOO_UNIQUE_ID);
         const TestOrigin = class extends Origin {};
         new TestOrigin(FOO_ID, []).query({
           foo: "foo-query"
@@ -95,7 +95,7 @@ test.describe("Origin id", () => {
       "private property _uniqueId should be calculated based on the combination of root _uniqueId and the extension of the queries ids",
       () => {
         const FOO_UNIQUE_ID = "foo-unique-id";
-        helpers.originUniqueId.returns(FOO_UNIQUE_ID);
+        helpers.uniqueId.returns(FOO_UNIQUE_ID);
         const TestOrigin = class extends Origin {};
         new TestOrigin(FOO_ID, [])
           .query({

@@ -3,7 +3,7 @@ import { isEqual, cloneDeep, merge } from "lodash";
 import { Cache } from "./Cache";
 
 import { EventEmitter } from "./EventEmitter";
-import { originUniqueId, queriedUniqueId } from "./helpers";
+import { uniqueId, queriedUniqueId } from "./helpers";
 
 import {
   READ_METHOD,
@@ -25,7 +25,7 @@ export class Origin {
     this._defaultValue =
       typeof defaultValue !== "undefined" ? cloneDeep(defaultValue) : defaultValue;
 
-    this._uniqueId = originUniqueId(this._id, this._defaultValue);
+    this._uniqueId = uniqueId(this._id, this._defaultValue);
     this._customQueries = {};
     this.customQueries = {};
     this.test = {};
