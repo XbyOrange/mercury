@@ -38,7 +38,7 @@ test.describe("helpers", () => {
   });
 
   test.describe("functionId method", () => {
-    test.it.only("should return a hash of stringified function", () => {
+    test.it("should return a hash of stringified function", () => {
       const fooFunction = () => {
         return "foo";
       };
