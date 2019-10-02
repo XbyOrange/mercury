@@ -174,6 +174,41 @@ test.describe("Selector id", () => {
         test.expect(testSelector._id).to.equal(`select:${FOO_ID_3}:${FOO_ID}:${FOO_ID_2}`);
       }
     );
+
+    test.it(
+      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
+      () => {
+        helpers.uniqueId.reset();
+        helpers.uniqueId.returns("foo-unique-id");
+        helpers.selectorUniqueId.reset();
+        testSelector = new Selector(
+          testOrigin3,
+          [
+            {
+              source: testOrigin,
+              query: query => query
+            },
+            {
+              source: testOrigin2,
+              query: query => query
+            }
+          ],
+          originResult => originResult
+        );
+        return Promise.all([
+          test
+            .expect(helpers.uniqueId)
+            .to.have.been.calledWith(`select:${FOO_ID_3}:${FOO_ID}:${FOO_ID_2}`, undefined),
+          test
+            .expect(helpers.selectorUniqueId)
+            .to.have.been.calledWith("foo-unique-id", [
+              "foo-unique-id",
+              "foo-unique-id",
+              "foo-unique-id"
+            ])
+        ]);
+      }
+    );
   });
 
   test.describe("when sources are selectors", () => {
@@ -200,6 +235,37 @@ test.describe("Selector id", () => {
           originResult => originResult
         );
         test.expect(testSelector._id).to.equal(`select:select:foo-origin-id`);
+      }
+    );
+
+    test.it(
+      "private property _uniqueId should be calculated based on selector id, default value, and sources uniqueIds",
+      () => {
+        helpers.uniqueId.reset();
+        helpers.uniqueId.returns("foo-unique-id");
+        helpers.selectorUniqueId.reset();
+        testOriginSelector = new Selector(
+          {
+            source: testOrigin,
+            query: query => query
+          },
+          result => result
+        );
+        testSelector = new Selector(
+          {
+            source: testOriginSelector,
+            query: query => query
+          },
+          originResult => originResult
+        );
+        return Promise.all([
+          test
+            .expect(helpers.uniqueId)
+            .to.have.been.calledWith(`select:select:foo-origin-id`, undefined),
+          test
+            .expect(helpers.selectorUniqueId)
+            .to.have.been.calledWith("foo-unique-id", ["foo-unique-id"])
+        ]);
       }
     );
 
