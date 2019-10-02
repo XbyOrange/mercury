@@ -32,8 +32,29 @@ test.describe("helpers", () => {
   });
 
   test.describe("selectorUniqueId method", () => {
-    test.it("should return concated provided id and selectors ids", () => {
-      test.expect(helpers.selectorUniqueId("foo", ["foo2", "foo3"])).to.equal("foo-foo2-foo3");
+    test.it("should return concated provided id, selectors ids and selector method hash", () => {
+      const fooSelectorMethod = () => "foo";
+      test
+        .expect(helpers.selectorUniqueId("foo", ["foo2", "foo3"], fooSelectorMethod, []))
+        .to.equal(`foo-foo2-foo3-${helpers.functionId(fooSelectorMethod)}`);
+    });
+
+    test.it("should add hashes of all provided source queries", () => {
+      const fooSelectorMethod = () => "foo";
+      const fooQuery1 = () => "foo-1";
+      const fooQuery2 = () => "foo-2";
+      test
+        .expect(
+          helpers.selectorUniqueId("foo", ["foo2", "foo3"], fooSelectorMethod, [
+            fooQuery1,
+            fooQuery2
+          ])
+        )
+        .to.equal(
+          `foo-foo2-foo3-${helpers.functionId(fooSelectorMethod)}-${helpers.functionId(
+            fooQuery1
+          )}-${helpers.functionId(fooQuery2)}`
+        );
     });
   });
 

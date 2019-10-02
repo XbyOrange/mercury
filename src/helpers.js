@@ -47,6 +47,10 @@ export const actions = {
   }
 };
 
+const dashJoin = arr => arr.join("-");
+
+const omitEmpty = arr => arr.filter(item => item.length > 0);
+
 export const hash = str => {
   return `${str.split("").reduce((a, b) => {
     a = (a << 5) - a + b.charCodeAt(0);
@@ -56,9 +60,18 @@ export const hash = str => {
 
 export const functionId = func => hash(func.toString().replace(/\s/g, ""));
 
+export const functionsId = funcs => dashJoin(funcs.map(functionId));
+
 export const uniqueId = (id, defaultValue) => hash(`${id}${JSON.stringify(defaultValue)}`);
 
 export const queriedUniqueId = (uniqueId, queryUniqueId) => `${uniqueId}-${queryUniqueId}`;
 
-export const selectorUniqueId = (uniqueId, sourcesUniqueIds) =>
-  `${uniqueId}-${sourcesUniqueIds.join("-")}`;
+export const selectorUniqueId = (uniqueId, sourcesUniqueIds, selectorMethod, sourcesQueries) =>
+  dashJoin(
+    omitEmpty([
+      uniqueId,
+      dashJoin(sourcesUniqueIds),
+      functionId(selectorMethod),
+      functionsId(sourcesQueries)
+    ])
+  );

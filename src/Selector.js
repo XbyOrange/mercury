@@ -34,10 +34,10 @@ export class Selector extends Origin {
         if (isArray(source)) {
           queries.push(getTestQueries(source));
         } else {
-          const hasQuery = !!source.source;
-          sourceIds.push(hasQuery ? source.source._id : source._id);
-          sourceUniqueIds.push(hasQuery ? source.source._uniqueId : source._uniqueId);
-          if (hasQuery) {
+          const hasQueryOrCatch = !!source.source;
+          sourceIds.push(hasQueryOrCatch ? source.source._id : source._id);
+          sourceUniqueIds.push(hasQueryOrCatch ? source.source._uniqueId : source._uniqueId);
+          if (hasQueryOrCatch && source.query) {
             queries.push(source.query);
             allQueries.push(source.query);
           }
