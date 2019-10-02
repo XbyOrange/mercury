@@ -93,16 +93,18 @@ test.describe("Selector id", () => {
     );
 
     test.it(
-      "private property _uniqueId should be calculated based on selector id, default value, sources uniqueIds, selector method and sources queries",
+      "private property _uniqueId should be calculated based on selector id, default value, sources uniqueIds, selector method, sources queries and sources catches",
       () => {
         helpers.uniqueId.reset();
         helpers.uniqueId.returns("foo-unique-id");
         helpers.selectorUniqueId.reset();
         const queryMethod = query => query;
+        const catchMethod = query => query;
         testSelector = new Selector(
           {
             source: testOrigin,
-            query: queryMethod
+            query: queryMethod,
+            catch: catchMethod
           },
           selectorMethod
         );
@@ -110,9 +112,13 @@ test.describe("Selector id", () => {
           test.expect(helpers.uniqueId).to.have.been.calledWith(`select:${FOO_ID}`, undefined),
           test
             .expect(helpers.selectorUniqueId)
-            .to.have.been.calledWith("foo-unique-id", ["foo-unique-id"], selectorMethod, [
-              queryMethod
-            ])
+            .to.have.been.calledWith(
+              "foo-unique-id",
+              ["foo-unique-id"],
+              selectorMethod,
+              [queryMethod],
+              [catchMethod]
+            )
         ]);
       }
     );
@@ -185,16 +191,20 @@ test.describe("Selector id", () => {
         helpers.selectorUniqueId.reset();
         const queryMethod1 = query => query;
         const queryMethod2 = query => query;
+        const catchMethod1 = query => query;
+        const catchMethod2 = query => query;
         testSelector = new Selector(
           testOrigin3,
           [
             {
               source: testOrigin,
-              query: queryMethod1
+              query: queryMethod1,
+              catch: catchMethod1
             },
             {
               source: testOrigin2,
-              query: queryMethod2
+              query: queryMethod2,
+              catch: catchMethod2
             }
           ],
           selectorMethod
@@ -209,7 +219,8 @@ test.describe("Selector id", () => {
               "foo-unique-id",
               ["foo-unique-id", "foo-unique-id", "foo-unique-id"],
               selectorMethod,
-              [queryMethod1, queryMethod2]
+              [queryMethod1, queryMethod2],
+              [catchMethod1, catchMethod2]
             )
         ]);
       }
@@ -251,6 +262,7 @@ test.describe("Selector id", () => {
         helpers.selectorUniqueId.reset();
         helpers.selectorUniqueId.returns("foo-selector-unique-id");
         const queryMethod = result => result;
+        const catchMethod = result => result;
         testOriginSelector = new Selector(
           {
             source: testOrigin,
@@ -261,7 +273,8 @@ test.describe("Selector id", () => {
         testSelector = new Selector(
           {
             source: testOriginSelector,
-            query: queryMethod
+            query: queryMethod,
+            catch: catchMethod
           },
           selectorMethod
         );
@@ -271,9 +284,13 @@ test.describe("Selector id", () => {
             .to.have.been.calledWith(`select:select:foo-origin-id`, undefined),
           test
             .expect(helpers.selectorUniqueId)
-            .to.have.been.calledWith("foo-unique-id", ["foo-selector-unique-id"], selectorMethod, [
-              queryMethod
-            ])
+            .to.have.been.calledWith(
+              "foo-unique-id",
+              ["foo-selector-unique-id"],
+              selectorMethod,
+              [queryMethod],
+              [catchMethod]
+            )
         ]);
       }
     );
