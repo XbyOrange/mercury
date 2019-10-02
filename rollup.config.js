@@ -41,15 +41,6 @@ module.exports = [
   {
     ...BASE_CONFIG,
     output: {
-      file: "dist/mercury.umd.js",
-      format: "umd",
-      name: "mercury",
-      globals: GLOBALS
-    }
-  },
-  {
-    ...BASE_CONFIG,
-    output: {
       file: "dist/mercury.esm.js",
       format: "esm",
       globals: GLOBALS
